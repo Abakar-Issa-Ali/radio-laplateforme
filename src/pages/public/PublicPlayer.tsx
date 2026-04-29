@@ -1,43 +1,126 @@
-import { useState } from 'react'
-import { Play, Pause, Volume2, VolumeX, Music, Clock, Loader } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Play, Pause, Volume2, VolumeX, Clock, Loader } from 'lucide-react'
 import { useNowPlaying } from '../../hooks/useNowPlaying'
 import { useAudioPlayer } from '../../hooks/useAudioPlayer'
 import styles from './PublicPlayer.module.css'
 
-/* ---- Vagues SVG background ---- */
-const WavePath = () => (
-  <>
-    <path
-      d="M0,80 C150,20 350,140 500,80 C650,20 850,140 1000,80
-         C1150,20 1350,140 1500,80 C1650,20 1850,140 2000,80 L2000,200 L0,200 Z"
-      fill="white"
+// Image (utilisée dans la pochette)
+const RADIO_LOGO = '/logo.gif'
+
+// Canvas vagues dans le logo box
+const LogoWaveCanvas = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    let phaseH = 0
+    let phaseV = 0
+    let animId: number
+
+    const draw = () => {
+      const w = canvas.width
+      const h = canvas.height
+      // Fond bleu
+      ctx.fillStyle = '#3fabff'
+      ctx.fillRect(0, 0, w, h)
+      // Vagues blanches denses
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 2.2
+
+      const spacing = 18
+      const amplitude = 10
+      const wavelength = 80
+      const numWaves = Math.ceil(h / spacing) + 2
+
+      for (let i = 0; i < numWaves; i++) {
+        const baseY = i * spacing + Math.sin(phaseV * 0.025 + i * 0.6) * 5
+        ctx.beginPath()
+        for (let x = 0; x <= w; x += 1.5) {
+          const y = baseY + Math.sin((x / wavelength) * Math.PI * 2 + (i * 0.9) - phaseH) * amplitude
+          if (x === 0) ctx.moveTo(x, y)
+          else ctx.lineTo(x, y)
+        }
+        ctx.stroke()
+      }
+      phaseH += 0.022
+      phaseV += 0.5
+      animId = requestAnimationFrame(draw)
+    }
+    draw()
+
+    return () => { cancelAnimationFrame(animId) }
+  }, [])
+
+  return <canvas ref={canvasRef} width={0} height={100} className={styles.logoCanvas} />
+}
+
+// Canvas vagues de fond pleine page
+const WaveCanvas = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    let phaseH = 0
+    let phaseV = 0
+    let animId: number
+
+    const resize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+    window.addEventListener('resize', resize)
+    resize()
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 2.5
+
+      const spacing = 60
+      const amplitude = 26
+      const wavelength = 320
+      const numWaves = Math.ceil(canvas.height / spacing) + 2
+
+      for (let i = 0; i < numWaves; i++) {
+        const baseY = i * spacing + Math.sin(phaseV * 0.03 + i * 0.5) * 8
+        ctx.beginPath()
+        for (let x = 0; x <= canvas.width; x += 2) {
+          const y = baseY + Math.sin((x / wavelength) * Math.PI * 2 + (i * 0.7) - phaseH) * amplitude
+          if (x === 0) ctx.moveTo(x, y)
+          else ctx.lineTo(x, y)
+        }
+        ctx.stroke()
+      }
+      phaseH += 0.018
+      phaseV += 0.6
+      animId = requestAnimationFrame(draw)
+    }
+    draw()
+
+    return () => {
+      window.removeEventListener('resize', resize)
+      cancelAnimationFrame(animId)
+    }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className={styles.waveBg}
+      style={{ opacity: 0.13 }}
     />
-  </>
-)
+  )
+}
 
-const WaveBg = () => (
-  <div className={styles.waveBg}>
-    <svg viewBox="0 0 2000 200" preserveAspectRatio="none">
-      <WavePath />
-    </svg>
-    <svg viewBox="0 0 2000 200" preserveAspectRatio="none" className={styles.wave2}>
-      <path
-        d="M0,100 C200,40 400,160 600,100 C800,40 1000,160 1200,100
-           C1400,40 1600,160 1800,100 C1900,70 1950,130 2000,100 L2000,200 L0,200 Z"
-        fill="white"
-      />
-    </svg>
-    <svg viewBox="0 0 2000 200" preserveAspectRatio="none" className={styles.wave3}>
-      <path
-        d="M0,120 C250,60 450,180 700,120 C950,60 1150,180 1400,120
-           C1600,70 1800,160 2000,120 L2000,200 L0,200 Z"
-        fill="white"
-      />
-    </svg>
-  </div>
-)
-
-/* ---- Animation barres audio ---- */
+// Animation barres audio
 const WaveAnimation = ({ active }: { active: boolean }) => (
   <div className={`${styles.wave} ${active ? styles.waveActive : ''}`}>
     {[1, 2, 3, 4, 5].map((i) => (
@@ -63,52 +146,49 @@ export default function PublicPlayer() {
     useAudioPlayer()
   const [showHistory, setShowHistory] = useState(false)
 
-  const song = data?.now_playing?.song
   const isLive = data?.live?.is_live ?? false
   const streamerName = data?.live?.streamer_name ?? ''
   const history = data?.song_history ?? []
+  const song = data?.now_playing?.song
 
   return (
     <div className={styles.container}>
-      {/* Background vagues */}
-      <WaveBg />
+      <WaveCanvas />
 
       <div className={styles.content}>
 
-        {/* Header : logo + auditeurs */}
+        {/* Logo texte avec fond vagues animées */}
         <header className={styles.header}>
           <div className={styles.logoBox}>
-            <span className={styles.logoTitle}>Radio EPHEM7RE</span>
-            <span className={styles.logoSub}>Marseille · Web Radio</span>
+            <LogoWaveCanvas />
+            <div className={styles.logoOverlay}>
+              <span className={styles.logoTitle}>Radio EPHEM7RE</span>
+              <span className={styles.logoSub}>MARSEILLE · WEB RADIO</span>
+            </div>
           </div>
-
-          <div className={styles.listeners}>
-            {isLive && (
-              <div className={styles.liveBadge}>
-                <span className={styles.liveDot} />
-                En direct
-              </div>
-            )}
-
-          </div>
+          {isLive && (
+            <div className={styles.liveBadge}>
+              <span className={styles.liveDot} />
+              En direct
+            </div>
+          )}
         </header>
 
-        {/* Label section */}
+        {/* Séparateur */}
         <div className={styles.sectionLabel}>À l'antenne</div>
 
         {/* Player card */}
         <main className={styles.playerCard}>
 
-          {/* Pochette */}
+          {/* Pochette — toujours le logo radio */}
           <div className={styles.artContainer}>
-            {song?.art ? (
-              <img src={song.art} alt="Pochette" className={styles.art} />
-            ) : (
-              <div className={styles.artPlaceholder}>
-                <Music size={40} strokeWidth={1.5} />
-                <span className={styles.artPlaceholderText}>En diffusion</span>
-              </div>
-            )}
+            <div className={styles.artPlaceholder}>
+              <img
+                src={RADIO_LOGO}
+                alt="Radio EPHEM7RE"
+                className={styles.radioLogoArt}
+              />
+            </div>
             <WaveAnimation active={isPlaying} />
           </div>
 
@@ -129,7 +209,7 @@ export default function PublicPlayer() {
             ) : (
               <>
                 <h1 className={styles.songTitle}>
-                  {song?.title || 'Radio La Plateforme'}
+                  {song?.title || 'Radio EPHEM7RE'}
                 </h1>
                 <p className={styles.songArtist}>
                   {song?.artist || 'En diffusion'}
@@ -146,11 +226,11 @@ export default function PublicPlayer() {
             aria-label={isPlaying ? 'Pause' : 'Écouter'}
           >
             {isLoading ? (
-              <Loader size={26} className={styles.spinner} />
+              <Loader size={28} className={styles.spinner} />
             ) : isPlaying ? (
-              <Pause size={26} />
+              <Pause size={28} />
             ) : (
-              <Play size={26} />
+              <Play size={28} />
             )}
           </button>
 
@@ -191,9 +271,10 @@ export default function PublicPlayer() {
           <div className={styles.history}>
             {history.slice(0, 8).map((item, i) => (
               <div key={i} className={styles.historyItem}>
-                {item.song.art && (
-                  <img src={item.song.art} alt="" className={styles.historyArt} />
-                )}
+                {item.song.art
+                  ? <img src={item.song.art} alt="" className={styles.historyArt} />
+                  : <img src={RADIO_LOGO} alt="" className={styles.historyArt} />
+                }
                 <div className={styles.historyInfo}>
                   <span className={styles.historyTitle}>{item.song.title}</span>
                   <span className={styles.historyArtist}>{item.song.artist}</span>
@@ -209,9 +290,10 @@ export default function PublicPlayer() {
           <span className={styles.footerLogo}>La Plateforme</span>
           <span>·</span>
           <span>Institut Français</span>
-          <span>·</span>
-          <span>AzuraCast</span>
+          {/* <span>·</span> */}
+          {/* <span>AzuraCast</span> */}
         </footer>
+
       </div>
     </div>
   )
