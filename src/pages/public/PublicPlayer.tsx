@@ -5,7 +5,7 @@ import { useAudioPlayer } from '../../hooks/useAudioPlayer'
 import styles from './PublicPlayer.module.css'
 
 // Image (utilisée dans la pochette)
-const RADIO_LOGO = '/logo.gif'
+const RADIO_LOGO = '/image.gif'
 
 // Canvas vagues dans le logo box
 const LogoWaveCanvas = () => {
