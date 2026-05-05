@@ -43,64 +43,14 @@
   gap: 1.5rem;
 }
 
-/* Header */
+/* Header — minimal quand pas en live */
 .header {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-}
-
-/* Logo box avec canvas vagues dedans */
-.logoBox {
-  position: relative;
-  width: min(460px, 90vw);
-  border: 3px solid #0060ff;
-  outline: 5px solid var(--med-pink);
-  outline-offset: -3px;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.35);
-}
-
-.logoCanvas {
-  display: block;
-  width: 100%;
-  height: 90px;
-  border-radius: 8px;
-}
-
-/* Texte superposé sur le canvas */
-.logoOverlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.logoTitle {
-  font-family: var(--font-display);
-  font-size: clamp(1.4rem, 5vw, 2rem);
-  font-weight: 800;
-  color: #0d0d0d;
-  letter-spacing: -0.01em;
-  line-height: 1;
-  -webkit-text-stroke: 2px var(--med-pink);
-  paint-order: stroke fill;
-}
-
-.logoSub {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: #0d0d0d;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  -webkit-text-stroke: 0.5px var(--med-pink);
-  paint-order: stroke fill;
+  min-height: 0;
 }
 
 /* Badge LIVE */
@@ -189,8 +139,8 @@
 .radioLogoArt {
   width: 100%;
   height: 100%;
-  object-fit: center;        /* ← remplit tout le cadre */
-  object-position: center;  /* ← centré */
+  object-fit: center;
+  object-position: center;
   display: block;
   background: #3fabff;
 }
@@ -439,22 +389,50 @@
   opacity: 0.8;
 }
 
-/* Footer */
+/* Footer logos officiels */
 .footer {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.3);
-  text-align: center;
-  letter-spacing: 0.06em;
   display: flex;
-  gap: 20px;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  padding: 0.5rem 1rem 0;
+  width: 100%;
 }
 
-.footerLogo {
-  font-weight: 700;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 0.08em;
+.footerLogoImg {
+  height: auto;
+  max-height: 32px;
+  max-width: 140px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.65;
+  transition: opacity 0.2s;
+  flex-shrink: 1;
+}
+
+.footerLogoImg:hover {
+  opacity: 1;
+}
+
+.footerSep {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.3);
+}
+
+/* Tailles spécifiques par logo */
+.footerLogoImg:first-child {
+  /* La Plateforme — logo */
+  max-height: 28px;
+  max-width: 160px;
+}
+
+.footerLogoImg:last-child {
+  /* Institut Français  */
+  max-height: 36px;
+  max-width: 120px;
 }
 
 /* Keyframes */
@@ -479,5 +457,8 @@
   .artContainer { width: 160px; height: 160px; }
   .playerCard { padding: 1.5rem 1rem; }
   .songTitle { font-size: 1.05rem; }
-  .logoCanvas { height: 76px; }
+  .footerLogoImg { max-height: 24px; max-width: 110px; }
+  .footerLogoImg:first-child { max-height: 22px; max-width: 130px; }
+  .footerLogoImg:last-child { max-height: 28px; max-width: 100px; }
+  .footerSep { display: none; }
 }
