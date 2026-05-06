@@ -518,6 +518,47 @@
 }
 
 /* ============================================================
+   BOUTONS MOBILES — visibles uniquement sur mobile
+   ============================================================ */
+.mobileBtns {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.mobileBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 9px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  background: black;
+  color: white;
+  border: 2px solid var(--med-pink);
+  box-shadow: 3px 3px 0px var(--med-pink);
+  transition: all 0.15s;
+}
+
+.mobileBtn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px var(--med-pink);
+}
+
+@media (min-width: 769px) {
+  .mobileBtns { display: none; }
+}
+
+/* ============================================================
    KEYFRAMES
    ============================================================ */
 @keyframes pulse {

@@ -144,6 +144,26 @@ export default function PublicPlayer() {
           )}
         </header>
 
+        {/* Boutons mobile — cachés sur desktop */}
+        <div className={styles.mobileBtns}>
+          <a
+            href="https://thomaslefevre-plateforme.github.io/Radio-EPHEM7RE/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.mobileBtn}
+          >
+            <ExternalLink size={13} />
+            Participez
+          </a>
+          <button
+            className={styles.mobileBtn}
+            onClick={() => {/* TODO: Archive */}}
+          >
+            <Archive size={13} />
+            Archive
+          </button>
+        </div>
+
         {/* Séparateur */}
         <div className={styles.sectionLabel}>À l'antenne</div>
 
