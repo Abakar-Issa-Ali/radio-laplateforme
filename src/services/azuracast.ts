@@ -1,8 +1,8 @@
 import axios from 'axios'
 
-const STATION_ID = 1
-const API_KEY = 'a4e30cfb3133a9d7:6b3101ddec208bdb77ab4c6925b89de1'
-const PUBLIC_BASE = 'http://167.99.214.245'
+const STATION_ID = Number(import.meta.env.VITE_STATION_ID ?? 1)
+const API_KEY = import.meta.env.VITE_AZURACAST_API_KEY ?? ''
+const PUBLIC_BASE = import.meta.env.VITE_PUBLIC_BASE ?? ''
 
 // API via proxy Vite (évite les problèmes CORS)
 const api = axios.create({
@@ -52,6 +52,8 @@ export interface NowPlaying {
 export interface StationStatus {
   backend_running: boolean
   frontend_running: boolean
+  backendRunning: boolean
+  frontendRunning: boolean
 }
 
 // Public endpoint (direct, pas de clé API nécessaire)
@@ -121,8 +123,3 @@ export const getStreamUrl = () =>
 
 export const STATION_NAME = 'Radio La Plateforme'
 export { STATION_ID, PUBLIC_BASE }
-
-export interface StationStatus {
-  backendRunning: boolean
-  frontendRunning: boolean
-}

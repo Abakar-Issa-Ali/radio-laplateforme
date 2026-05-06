@@ -1,73 +1,161 @@
-# React + TypeScript + Vite
+# 📻 Radio La Plateforme
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface web pour la radio du festival La Plateforme (18–24 mai 2026).  
+Construite avec React + TypeScript + Vite, connectée à AzuraCast via son API.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🗂 Structure
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── pages/
+│   ├── public/       → Player public (/)
+│   ├── admin/        → Dashboard admin (/admin)
+│   └── Archive/      → Archives des émissions (/admin/archive)
+├── services/
+│   └── azuracast.ts  → Appels API AzuraCast
+└── hooks/
+    ├── useNowPlaying.ts
+    └── useAudioPlayer.ts
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚙️ Configuration
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Copier le fichier d'exemple
+
+```bash
+cp .env.example .env.local
 ```
+
+### 2. Renseigner les valeurs dans `.env.local`
+
+```env
+VITE_PUBLIC_BASE=http://VOTRE_IP_OU_DOMAINE
+VITE_RECORDINGS_API_URL=http://VOTRE_IP_OU_DOMAINE:3000
+VITE_AZURACAST_API_KEY=VOTRE_CLE_API_AZURACAST
+VITE_STATION_ID=1
+```
+
+## 🚀 Installation et build
+
+```bash
+# Installer les dépendances
+npm install
+
+# Lancer en développement (avec hot-reload)
+npm run dev
+
+# Build de production
+npm run build
+# → génère le dossier dist/
+```
+
+---
+
+## 🖥 Déploiement sur le serveur (OVH ou autre)
+
+### Prérequis serveur
+
+- Nginx installé
+- Node.js 20+ (pour le build uniquement, pas nécessaire en prod)
+- AzuraCast installé et fonctionnel (via Docker)
+- API Python recordings en service systemd sur le port 3002
+- Nginx configuré pour servir le dossier `dist/`
+
+### Étapes
+
+**1. Cloner le repo et configurer**
+```bash
+git clone https://github.com/Abakar-Issa-Ali/radio-laplateforme.git
+cd radio-laplateforme
+cp .env.example .env.local
+# Éditer .env.local avec les vraies valeurs
+nano .env.local
+```
+
+**2. Build**
+```bash
+npm install
+npm run build
+```
+
+**3. Copier le build dans le dossier web**
+```bash
+cp -r dist/* /var/www/radio-laplateforme/
+```
+
+**4. Config Nginx** (exemple `/etc/nginx/sites-available/radio-laplateforme`)
+
+```nginx
+server {
+    listen 3000;
+    root /var/www/radio-laplateforme;
+    index index.html;
+
+    # React SPA routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy vers AzuraCast
+    location /api/ {
+        proxy_pass http://localhost:8080/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /listen/ {
+        proxy_pass http://localhost:8080/listen/;
+    }
+
+    # Proxy vers l'API recordings Python (port 3002)
+    location /recordings/ {
+        proxy_pass http://localhost:3002/recordings/;
+    }
+
+    location /api-recordings/ {
+        proxy_pass http://localhost:3002/api-recordings/;
+    }
+}
+```
+
+**5. Recharger Nginx**
+```bash
+nginx -t && systemctl reload nginx
+```
+
+---
+
+## 🎙 Connexion DJ (BUTT)
+
+| Paramètre        | Valeur                         |
+|------------------|--------------------------------|
+| Serveur          | IP ou domaine du serveur       |
+| Port             | 8005                           |
+| Type             | Icecast                        |
+| Point de montage | /                              |
+| Bitrate          | 128 kbps recommandé            |
+
+---
+
+## 🔧 Services serveur
+
+| Service              | Commande                          |
+|----------------------|-----------------------------------|
+| AzuraCast (Docker)   | `cd /root && docker compose up -d` |
+| API recordings       | `systemctl status radio-api`       |
+| Nginx                | `systemctl status nginx`           |
+
+---
+
+## 📦 Variables d'environnement — référence complète
+
+| Variable                  | Description                              | Exemple                          |
+|---------------------------|------------------------------------------|----------------------------------|
+| `VITE_PUBLIC_BASE`        | URL base AzuraCast (sans slash final)    | `http://192.168.1.100`           |
+| `VITE_RECORDINGS_API_URL` | URL de l'API recordings                  | `http://192.168.1.100:3000`      |
+| `VITE_AZURACAST_API_KEY`  | Clé API AzuraCast                        | `abc123:def456`                  |
+| `VITE_STATION_ID`         | ID de la station (1 par défaut)          | `1`                              |

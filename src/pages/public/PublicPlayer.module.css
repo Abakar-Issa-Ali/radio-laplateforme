@@ -30,6 +30,96 @@
   z-index: 0;
 }
 
+/* ============================================================
+   BOUTONS COINS HAUT — desktop uniquement
+   ============================================================ */
+.cornerBtnLeft,
+.cornerBtnRight {
+  display: none; /* masqués sur mobile */
+}
+
+@media (min-width: 769px) {
+  .cornerBtnLeft,
+  .cornerBtnRight {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    position: fixed;
+    top: 28px;
+    z-index: 10;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    /* style néo-brutaliste */
+    background: black;
+    color: white;
+    border: 2px solid var(--med-pink);
+    box-shadow: 4px 4px 0px var(--med-pink);
+  }
+
+  .cornerBtnLeft:hover,
+  .cornerBtnRight:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--med-pink);
+  }
+
+  .cornerBtnLeft:active,
+  .cornerBtnRight:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--med-pink);
+  }
+
+  .cornerBtnLeft  { left: 32px; }
+  .cornerBtnRight { right: 32px; }
+}
+
+/* ============================================================
+   LOGOS COINS BAS — desktop uniquement
+   ============================================================ */
+.desktopLogoLeft,
+.desktopLogoRight {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .desktopLogoLeft,
+  .desktopLogoRight {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    bottom: 32px;
+    z-index: 10;
+  }
+
+  .desktopLogoLeft  { left: 32px; }
+  .desktopLogoRight { right: 32px; }
+
+  .desktopLogoImg {
+    height: auto;
+    max-height: 40px;
+    max-width: 180px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    opacity: 0.55;
+    transition: opacity 0.2s;
+  }
+
+  .desktopLogoImg:hover {
+    opacity: 0.9;
+  }
+}
+
+/* ============================================================
+   CONTENT & LAYOUT
+   ============================================================ */
 .content {
   position: relative;
   z-index: 1;
@@ -43,7 +133,7 @@
   gap: 1.5rem;
 }
 
-/* Header — minimal quand pas en live */
+/* Header — minimal, juste le live badge */
 .header {
   width: 100%;
   display: flex;
@@ -120,11 +210,11 @@
   animation: fadeIn 0.5s ease;
 }
 
-/* Pochette */
+/* Pochette — carré sur desktop, rectangle sur mobile */
 .artContainer {
   position: relative;
-  width: 260px;
-  height: 350px;
+  width: 100%;
+  aspect-ratio: 1 / 1; /* carré, s'adapte à la largeur de la card */
 }
 
 .artPlaceholder {
@@ -139,7 +229,7 @@
 .radioLogoArt {
   width: 100%;
   height: 100%;
-  object-fit: center;
+  object-fit: cover;
   object-position: center;
   display: block;
   background: #3fabff;
@@ -389,7 +479,9 @@
   opacity: 0.8;
 }
 
-/* Footer logos officiels */
+/* ============================================================
+   FOOTER — mobile uniquement (caché sur desktop)
+   ============================================================ */
 .footer {
   display: flex;
   align-items: center;
@@ -400,9 +492,13 @@
   width: 100%;
 }
 
+@media (min-width: 769px) {
+  .footer { display: none; }
+}
+
 .footerLogoImg {
   height: auto;
-  max-height: 32px;
+  max-height: 28px;
   max-width: 140px;
   width: auto;
   object-fit: contain;
@@ -412,9 +508,8 @@
   flex-shrink: 1;
 }
 
-.footerLogoImg:hover {
-  opacity: 1;
-}
+.footerLogoImg:first-child { max-height: 24px; max-width: 150px; }
+.footerLogoImg:last-child  { max-height: 32px; max-width: 110px; }
 
 .footerSep {
   font-family: var(--font-mono);
@@ -422,20 +517,9 @@
   color: rgba(255,255,255,0.3);
 }
 
-/* Tailles spécifiques par logo */
-.footerLogoImg:first-child {
-  /* La Plateforme — logo */
-  max-height: 28px;
-  max-width: 160px;
-}
-
-.footerLogoImg:last-child {
-  /* Institut Français  */
-  max-height: 36px;
-  max-width: 120px;
-}
-
-/* Keyframes */
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
@@ -451,14 +535,12 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive */
+/* Responsive petits mobiles */
 @media (max-width: 480px) {
   .content { padding: 1.5rem 1rem 2rem; }
-  .artContainer { width: 160px; height: 160px; }
   .playerCard { padding: 1.5rem 1rem; }
   .songTitle { font-size: 1.05rem; }
-  .footerLogoImg { max-height: 24px; max-width: 110px; }
-  .footerLogoImg:first-child { max-height: 22px; max-width: 130px; }
-  .footerLogoImg:last-child { max-height: 28px; max-width: 100px; }
+  .footerLogoImg:first-child { max-height: 20px; max-width: 120px; }
+  .footerLogoImg:last-child  { max-height: 26px; max-width: 95px; }
   .footerSep { display: none; }
 }

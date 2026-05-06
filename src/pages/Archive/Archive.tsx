@@ -9,6 +9,8 @@ interface Recording {
   size: number
 }
 
+const RECORDINGS_API = import.meta.env.VITE_RECORDINGS_API_URL ?? ''
+
 const formatSize = (bytes: number) => {
   const mb = bytes / (1024 * 1024)
   return mb >= 1 ? `${mb.toFixed(1)} MB` : `${(bytes / 1024).toFixed(0)} KB`
@@ -74,7 +76,7 @@ export default function Archive() {
     if (!confirm(`Supprimer "${formatDuration(filename, mtime)}" ?`)) return
     setDeletingFile(filename)
     try {
-      const res = await fetch(`http://167.99.214.245:3000/api-recordings/${encodeURIComponent(filename)}`, { method: 'DELETE' })
+      const res = await fetch(`${RECORDINGS_API}/api-recordings/${encodeURIComponent(filename)}`, { method: 'DELETE' })
       if (res.ok) {
         setRecordings(prev => prev.filter(r => r.name !== filename))
       }
@@ -84,35 +86,31 @@ export default function Archive() {
       setDeletingFile(null)
     }
   }
-const handleRename = async (filename: string) => {
-  if (!newName.trim()) return
-  const finalName = newName.endsWith('.mp3') ? newName : `${newName}.mp3`
-  console.log('Renaming:', filename, '->', finalName)
-  try {
-    const res = await fetch(`http://167.99.214.245:3000/api-recordings/${encodeURIComponent(filename)}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ newName: finalName }),
-    })
-    console.log('Response status:', res.status)
-    const data = await res.json()
-    console.log('Response data:', data)
-    if (res.ok) {
-      setRenamingFile(null)
-      setNewName('')
-      setLoading(true)
-      const r = await fetch(`/recordings/?t=${Date.now()}`)
-      const listData = await r.json()
-      const files = listData.filter((f: Recording) => f.type === 'file' && f.name.endsWith('.mp3'))
-      files.sort((a: Recording, b: Recording) => new Date(b.mtime).getTime() - new Date(a.mtime).getTime())
-      setRecordings(files)
-      setLoading(false)
+
+  const handleRename = async (filename: string) => {
+    if (!newName.trim()) return
+    const finalName = newName.endsWith('.mp3') ? newName : `${newName}.mp3`
+    try {
+      const res = await fetch(`${RECORDINGS_API}/api-recordings/${encodeURIComponent(filename)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newName: finalName }),
+      })
+      if (res.ok) {
+        setRenamingFile(null)
+        setNewName('')
+        setLoading(true)
+        const r = await fetch(`/recordings/?t=${Date.now()}`)
+        const listData = await r.json()
+        const files = listData.filter((f: Recording) => f.type === 'file' && f.name.endsWith('.mp3'))
+        files.sort((a: Recording, b: Recording) => new Date(b.mtime).getTime() - new Date(a.mtime).getTime())
+        setRecordings(files)
+        setLoading(false)
+      }
+    } catch {
+      alert('Erreur lors du renommage')
     }
-  } catch (err) {
-    console.log('Error:', err)
-    alert('Erreur lors du renommage')
   }
-}
 
   const totalSize = recordings.reduce((acc, r) => acc + r.size, 0)
 
@@ -161,8 +159,8 @@ const handleRename = async (filename: string) => {
         </div>
       ) : (
         <div className={styles.list}>
-           {recordings.map((recording) => (
-             <div key={recording.name} className={styles.item}>
+          {recordings.map((recording) => (
+            <div key={recording.name} className={styles.item}>
               <div className={styles.itemIcon}>
                 <Music size={20} />
               </div>
