@@ -238,7 +238,7 @@
 /* Wave animation barres */
 .wave {
   position: absolute;
-  bottom: -18px;
+  bottom: -24px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -251,12 +251,12 @@
   display: block;
   width: 4px;
   background: var(--med-pink);
-  border-radius: 2px;
-  transform: scaleY(0.3);
+  border-radius: 1px;
+  transform: scaleY(0.5);
 }
 
 .waveActive span {
-  animation: waveBar 0.8s ease-in-out infinite;
+  animation: waveBar 0.6s ease-in-out infinite;
 }
 
 @keyframes waveBar {
@@ -271,12 +271,12 @@
 }
 
 .songTitle {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 300;
   color: white;
   margin-bottom: 0.4rem;
-  line-height: 1.2;
+  line-height: 1.5;
 }
 
 .songArtist {
