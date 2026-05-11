@@ -214,7 +214,7 @@
 .artContainer {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1; /* carré, s'adapte à la largeur de la card */
+  aspect-ratio: 1 / 1;
 }
 
 .artPlaceholder {
