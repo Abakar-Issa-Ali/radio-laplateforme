@@ -55,7 +55,7 @@ npm run build
 
 ---
 
-## 🖥 Déploiement sur le serveur (OVH ou autre)
+## 🖥 Déploiement sur le serveur
 
 ### Prérequis serveur
 
